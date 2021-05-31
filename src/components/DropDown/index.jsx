@@ -1,5 +1,4 @@
 import React, {useState, useEffect} from 'react';
-import { camelize } from './../../lib/helpers';
 const DropDown = ({
   dropDownAction,
   field: { type, name, options }
@@ -19,8 +18,8 @@ const DropDown = ({
   const handleChange = (e, option) => {
     e.preventDefault();
     if (type === 'single') {
-      const selectedValue = [camelize(option.value)];
-      dropDownAction(camelize(name), selectedValue);
+      const selectedValue = [option.value];
+      dropDownAction(name, selectedValue);
       setState({
         expanded: false,
         selectedText: option.value,
@@ -30,12 +29,12 @@ const DropDown = ({
     // enable multiselet
     else if (type === 'multiple') {
     const selectedValue = state.selectedValue;
-      if (selectedValue.includes(camelize(option.value))) {
-        selectedValue.splice(selectedValue.indexOf(camelize(option.value)), 1);
+      if (selectedValue.includes(option.value)) {
+        selectedValue.splice(selectedValue.indexOf(option.value), 1);
       } else {
-        selectedValue.push(camelize(option.value));
+        selectedValue.push(option.value);
       }
-      dropDownAction(camelize(name), selectedValue);
+      dropDownAction(name, selectedValue);
       setState({
         expanded: true,
         selectedText: selectedValue.length ?selectedValue.join(', ') : name,
@@ -63,6 +62,9 @@ const DropDown = ({
       <div />
       {state.expanded && (
         <div className="dropdown-options">
+          {(!options || options.length < 1) &&
+            <span className="no-options">no options</span>
+          }
           {options.map((option, i) => (
             <button
               className="option-btn"

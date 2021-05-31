@@ -2,43 +2,94 @@ import All from './eventsSpec';
 
 export const camelize = s => s.replace(/-./g, x => x.toUpperCase()[1]);
 
-export const getAvailableFields = (currentEvent) => {
-  const selectedType = All.filter(el => el.value === currentEvent.eventType)[0] || {};
-  const fields = selectedType.fields || [];
-  let avFields = [...fields];
+const isNotEmpty = obj => Object.keys(obj).length > 0;
 
-  // filter fields with excludes
-  avFields.forEach((field,i) => {
-    if (field.exclude) {
-      for (const [key, value] of Object.entries(field.exclude)) {
-        if (currentEvent.hasOwnProperty(key)) {
-          if (value.some(ai => currentEvent[key].includes(camelize(ai)))) {
-            avFields.splice(i, 1);
-          }
-        }
+const arraysHaveCommonality = (arr1, arr2) => arr1.some(item => arr2.includes(item));
+
+const isAllIncluded = (currentEvent,canBeIncluded,finalOptions,option) => {
+  for(const key in canBeIncluded){
+    if(!currentEvent[key] || !arraysHaveCommonality(currentEvent[key],canBeIncluded[key])){
+      return 
+    }
+  }
+  finalOptions.push(option)
+}
+
+const isAnyIncluded = (currentEvent,canBeIncluded,finalOptions,option) => {
+  for(const key in canBeIncluded){
+    if(currentEvent[key] && arraysHaveCommonality(currentEvent[key],canBeIncluded[key])){
+      finalOptions.push(option)
+      return 
+    }
+  }
+}
+
+const findObject = (fields, name) => fields.find(field => field.name === name);
+
+const createObject = (currentEvent, fields, name) => {
+  const returnedObject = findObject(fields,name)
+  if(returnedObject.exclude){
+    let canBeExcluded = returnedObject.exclude // throw in
+    for(const key in canBeExcluded){
+      if(currentEvent[key] && arraysHaveCommonality(currentEvent[key],canBeExcluded[key])){
+        return {}
       }
     }
-  });
-  
-  // exclude and include based on last modified event attr
-  avFields.forEach((field, i) => {
-    let fieldOptions = JSON.parse(JSON.stringify(field.options));
-    fieldOptions.forEach((option, j) => {
-      // handle option excludes
-      if (option.exclude) {
-        for (const [key, value] of Object.entries(option.exclude)) {
-          if (currentEvent.hasOwnProperty(key)) {
-            if (value.some(ai => currentEvent[key].includes(camelize(ai)))) {
-              fieldOptions.splice(j, 1);
-            }
-          }
+  }
+  const possibleOptions = [...returnedObject.options]
+  //create options
+  const finalOptions = []
+  if(possibleOptions){
+    possibleOptions.forEach(option=>{
+      if(option.include){
+        let canBeIncluded = option.include
+        const anded = canBeIncluded.anded
+        if(anded){
+          delete canBeIncluded.anded
+          isAllIncluded(currentEvent,canBeIncluded,finalOptions,option)
+        }else{
+          isAnyIncluded(currentEvent,canBeIncluded,finalOptions,option)
         }
       }
-      // handle option Include 
-
-      // set field options
-      field.options = fieldOptions
+      else if(option.exclude){
+        let canBeExcluded = option.exclude
+        for(const key in canBeExcluded){
+          if(!currentEvent[key] || !arraysHaveCommonality(currentEvent[key],canBeExcluded[key])){
+            finalOptions.push(option)
+          }
+        }
+      }else{
+        finalOptions.push(option)
+      }
     })
+  }
+  returnedObject.options = finalOptions 
+  return returnedObject
+}
+
+const getFields = (currentEvent) => {
+  const eventData = JSON.parse(JSON.stringify(All[currentEvent.eventType==='pass'?1:0]))
+  const fields =JSON.parse(JSON.stringify((eventData.fields))) || []
+  const finalFields = []
+  if(fields.length===0) return fields
+  
+
+  fields.forEach(field=>{
+    let ob = createObject(currentEvent, fields, field.name)
+    if(isNotEmpty(ob)){finalFields.push(ob)}
   })
-  return avFields;
+  return finalFields
+}
+
+export const getAvailableFields = (currentEvent) => {
+  if(currentEvent.eventType){
+    return getFields(currentEvent)
+  }
+}
+
+
+
+export const getShortcuts = () => {
+  const map = All.map(el => [el.value, el.shortcuts]);
+  return Object.fromEntries(map)
 }
