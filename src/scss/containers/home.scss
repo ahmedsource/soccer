@@ -31,6 +31,10 @@
         background-color: $color-dark-gray;
         color: $color-white;
       }
+      &:focus {
+        outline: 1px dotted #212121;
+        outline: 5px auto -webkit-focus-ring-color;
+      }
     }
   }
 
@@ -47,7 +51,7 @@
     top: 0;
     left: 0;
     position: absolute;
-    height: 100px;
+    height: 80px;
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -59,8 +63,8 @@
   & .submit-btn{
       width: 200px;
       position: absolute;
-      top: 100px;
-      left: 42%;
+      top: 40px;
+      left: 40%;
       border: 0;
       background-color: $color-light-gray;
       color: $color-black;

@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from 'react';
 const DropDown = ({
   dropDownAction,
+  eventType,
+  team,
   field: { type, name, options }
 }) => {
   
@@ -13,7 +15,7 @@ const DropDown = ({
       selectedValue: [],
     })
     return () => {}
-  }, [name])
+  }, [name, eventType, team])
 
   const handleChange = (e, option) => {
     e.preventDefault();

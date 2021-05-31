@@ -2,15 +2,19 @@ import React from 'react';
 const Panel = ({ team, setCurrentEvent }) => {
   return (
     <div className="panel">
-      <button onClick={() => setCurrentEvent({
-        team, eventType: "pass"
-      })}
+      <button onClick={e => {
+        setCurrentEvent({
+          team, eventType: "pass"
+        })
+      }}
       >
         Pass
       </button>
-        <button onClick={() => setCurrentEvent({
-        team, eventType: "shot"
-      })}
+      <button onClick={e => {
+        setCurrentEvent({
+          team, eventType: "shot"
+        })
+      }}
       >
         Shot
       </button>

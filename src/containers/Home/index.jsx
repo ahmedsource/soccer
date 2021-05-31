@@ -60,6 +60,8 @@ const Home = () => {
                   key={`dropdown-${i}`}
                   field={field}
                   dropDownAction={dropDownAction}
+                  eventType={currentEvent.eventType}
+                  team={currentEvent.team}
                 />
               );
             })}
